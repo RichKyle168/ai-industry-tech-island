@@ -453,3 +453,13 @@ body.panel-open #tourbar { left: calc((100% - var(--panel-w) - 32px) / 2); }
 #legend .leg-real i { width: 16px; height: 4px; border-radius: 2px; margin-left: 6px; }
 body.real-on #legend .leg-real { display: inline-flex; align-items: center; }
 body.real-on #legend .hint { display: none; }
+.plabel.focus { padding: 5px 12px; font-size: 16px; box-shadow: 0 0 0 3px #fff, 0 6px 18px rgba(120, 20, 10, 0.4); }
+.realtop { margin: 12px 0 4px; background: color-mix(in srgb, var(--sc) 9%, #fff); border: 1.5px solid color-mix(in srgb, var(--sc) 45%, #fff); border-radius: 14px; padding: 10px 12px; }
+.realtop .rt-a { display: flex; align-items: center; gap: 10px; font-size: 14px; color: var(--ink-soft); }
+.realtop .rt-a .pin-ic { flex: none; background: var(--sc); }
+.realtop .rt-a b { display: block; font-size: 18px; color: var(--ink); line-height: 1.35; }
+.realtop .rt-b { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; margin-top: 8px; font-size: 13px; color: var(--ink-soft); }
+.realtop .rt-btns { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+.realtop .rt-btns button { display: inline-flex; align-items: center; gap: 6px; border: 0; border-radius: 999px; padding: 7px 14px; font-size: 15px; font-weight: 700; background: #fff; color: var(--ink); box-shadow: 0 1px 0 rgba(0,0,0,.06), 0 0 0 1px var(--line); cursor: pointer; }
+.realtop .rt-btns button:first-child { background: var(--sc); color: #fff; box-shadow: none; }
+.realtop .rt-btns svg { width: 16px; height: 16px; }
