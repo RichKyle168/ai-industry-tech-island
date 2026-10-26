@@ -1404,9 +1404,9 @@ window.ISLAND_EXTRA = {
   },
 
   decor: [
-    { name: '雪山山脈', xy: [36, -50], r: 5.5, h: 7 },
-    { name: '玉山', xy: [26, 19], r: 6, h: 8.5 },
-    { name: '大武山', xy: [10, 48], r: 5, h: 6.5 },
+    { name: '雪山', xy: [27, -44], r: 3.2, h: 4.4, snow: true },
+    { name: '玉山', xy: [8, 20], r: 3.4, h: 5, snow: true },
+    { name: '大武山', xy: [-2, 50], r: 2.8, h: 3.6 },
     { name: '鵝鑾鼻', xy: [-6, 90], r: 4.2, h: 2.5, lighthouse: true },
   ],
 
@@ -2096,9 +2096,11 @@ window.ISLAND_EXTRA = {
     body.push(place(topSide(Cyl(d.r * 1.05, d.r * 1.15, 1.1, 9), C.sand, C.sandSide), 0, -0.35, 0));
     body.push(place(topSide(Cyl(d.r * 0.9, d.r * 0.98, 1.0, 9), '#86BE62', '#9A7E5E'), 0, 0.7, 0));
     if (!d.lighthouse) {
-      body.push(place(topSide(Cone(d.r * 0.85, d.h, 7), '#6FA35A', '#8C8272'), 0, 1.2 + d.h / 2, 0, r() * 3));
-      body.push(place(solid(Cone(d.r * 0.42, d.h * 0.42, 7), '#8C8C86'), d.r * 0.25, 1.2 + d.h * 0.42 / 2 + d.h * 0.25, -d.r * 0.2, r() * 3));
-      for (let t = 0; t < 4; t++) { const a = r() * 6.28; body.push(...tree(r, Math.cos(a) * d.r * 0.7, Math.sin(a) * d.r * 0.7, '#6FA35A').map((g) => place(g, 0, -G + 1.2, 0))); }
+      const rot = r() * 3;
+      body.push(place(topSide(Cone(d.r * 0.85, d.h, 7), '#6FA35A', '#8C8272'), 0, 1.2 + d.h / 2, 0, rot));
+      if (d.snow) body.push(place(solid(Cone(d.r * 0.85 * 0.36, d.h * 0.34, 7), '#F4F7FA', 0.02), 0, 1.2 + d.h - d.h * 0.17 + 0.05, 0, rot));
+      else body.push(place(solid(Cone(d.r * 0.42, d.h * 0.42, 7), '#8C8C86'), d.r * 0.25, 1.2 + d.h * 0.42 / 2 + d.h * 0.25, -d.r * 0.2, r() * 3));
+      for (let t = 0; t < 3; t++) { const a = t * 2.1 + r(); body.push(...tree(r, Math.cos(a) * d.r * 0.86, Math.sin(a) * d.r * 0.86, '#6FA35A').map((g) => place(g, 0, -G + 1.2, 0))); }
     } else {
       body.push(place(colorize(Cyl(0.55, 0.75, 3.4, 10), (cc, ny, yy) => { cc.set(Math.floor((yy + 10) * 1.6) % 2 ? '#FFFFFF' : '#E2483D'); }), 0, 1.2 + 1.7, 0));
       body.push(place(solid(Cone(0.7, 0.6, 10), '#3B4A63'), 0, 1.2 + 3.7, 0));

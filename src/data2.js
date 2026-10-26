@@ -99,9 +99,9 @@ window.ISLAND_EXTRA = {
   },
 
   decor: [
-    { name: '雪山山脈', xy: [36, -50], r: 5.5, h: 7 },
-    { name: '玉山', xy: [26, 19], r: 6, h: 8.5 },
-    { name: '大武山', xy: [10, 48], r: 5, h: 6.5 },
+    { name: '雪山', xy: [27, -44], r: 3.2, h: 4.4, snow: true },
+    { name: '玉山', xy: [8, 20], r: 3.4, h: 5, snow: true },
+    { name: '大武山', xy: [-2, 50], r: 2.8, h: 3.6 },
     { name: '鵝鑾鼻', xy: [-6, 90], r: 4.2, h: 2.5, lighthouse: true },
   ],
 
