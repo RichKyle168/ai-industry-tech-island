@@ -466,3 +466,13 @@ body.real-on #legend .hint { display: none; }
 .pchips { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 8px; font-size: 13px; color: var(--ink-soft); }
 .pchip { border: 1px solid #F1B8B2; background: #FFF4F2; color: #B8352B; border-radius: 999px; padding: 2px 10px; font-size: 14px; font-weight: 700; cursor: pointer; }
 .pchip:hover { background: #E2483D; color: #fff; }
+.cluster { background: var(--wash); border-radius: 14px; padding: 12px 14px; margin: 10px 0 4px; }
+.cl-h { font-size: 13px; font-weight: 700; color: var(--ink-soft); letter-spacing: .04em; margin-bottom: 6px; }
+.cl-h:not(:first-child) { margin-top: 12px; }
+.cl-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.cl-list li { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 10px; font-size: 16px; line-height: 1.45; padding-left: 16px; position: relative; }
+.cl-list li::before { content: ""; position: absolute; left: 2px; top: .55em; width: 8px; height: 8px; border-radius: 50%; background: #9FB0C0; }
+.cl-list li.here::before { background: var(--sea); box-shadow: 0 0 0 3px color-mix(in srgb, var(--sea) 25%, transparent); }
+.cl-list li b { font-weight: 700; }
+.cl-list li span { font-size: 14px; color: var(--ink-soft); }
+.cluster .pchips { margin-top: 0; }

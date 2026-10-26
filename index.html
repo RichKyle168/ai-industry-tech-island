@@ -485,6 +485,16 @@ body.real-on #legend .hint { display: none; }
 .pchips { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 8px; font-size: 13px; color: var(--ink-soft); }
 .pchip { border: 1px solid #F1B8B2; background: #FFF4F2; color: #B8352B; border-radius: 999px; padding: 2px 10px; font-size: 14px; font-weight: 700; cursor: pointer; }
 .pchip:hover { background: #E2483D; color: #fff; }
+.cluster { background: var(--wash); border-radius: 14px; padding: 12px 14px; margin: 10px 0 4px; }
+.cl-h { font-size: 13px; font-weight: 700; color: var(--ink-soft); letter-spacing: .04em; margin-bottom: 6px; }
+.cl-h:not(:first-child) { margin-top: 12px; }
+.cl-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.cl-list li { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 10px; font-size: 16px; line-height: 1.45; padding-left: 16px; position: relative; }
+.cl-list li::before { content: ""; position: absolute; left: 2px; top: .55em; width: 8px; height: 8px; border-radius: 50%; background: #9FB0C0; }
+.cl-list li.here::before { background: var(--sea); box-shadow: 0 0 0 3px color-mix(in srgb, var(--sea) 25%, transparent); }
+.cl-list li b { font-weight: 700; }
+.cl-list li span { font-size: 14px; color: var(--ink-soft); }
+.cluster .pchips { margin-top: 0; }
 
 </style>
 </head>
@@ -1693,6 +1703,9 @@ window.ISLAND_EXTRA = {
 window.ISLAND_EXTRA.places = {"tpe": {"name": "大台北", "xy": [29.3, -82.7]}, "tyn": {"name": "桃園", "xy": [11.2, -77.7]}, "hsz": {"name": "新竹", "xy": [1.7, -67.5]}, "txg": {"name": "台中", "xy": [-18.5, -31.6]}, "chw": {"name": "彰化", "xy": [-29.2, -24.5]}, "nto": {"name": "南投", "xy": [-15.9, -17.7]}, "yun": {"name": "雲林", "xy": [-30.3, -3.9]}, "cyi": {"name": "嘉義", "xy": [-28.0, 3.8]}, "tnn": {"name": "台南", "xy": [-42.5, 38.8]}, "khh": {"name": "高雄", "xy": [-36.9, 54.9]}, "pif": {"name": "屏東", "xy": [-22.2, 58.2]}};
 window.ISLAND_EXTRA.real = {"xunkai": ["tpe", "臺北市內湖區（訊凱）、南港區（偲倢）", "ok"], "apmic": ["tpe", "臺北市中山區", "ok"], "asusesg": ["tpe", "臺北市北投區", "ok"], "ntmetro": ["tpe", "新北捷運場站（新北市）", "ok"], "asusmed": ["tpe", "臺北市北投區", "ok"], "meko": ["tpe", "臺北市大安區", "ok"], "mirle": ["hsz", "新竹科學園區（總部）；導入場域在台南成大沙崙分院", "far"], "aim": ["tpe", "新北市中和區", "ok"], "bnct": ["khh", "高雄市岡山區（登記）、路竹區", "far"], "dkai": ["tpe", "臺北市內湖區；導入場域在台大醫院竹北院區", "ok"], "bmi": ["tpe", "新北市新店區", "ok"], "bigmove": ["tpe", "臺北市內湖區", "ok"], "mifei": ["tpe", "臺北市中山區", "ok"], "compal": ["tpe", "臺北市內湖區", "ok"], "dazong": ["khh", "大綜電腦在高雄市；共同申請的洞視科技在臺北市中山區", "near"], "hst": ["tpe", "新北市中和區", "ok"], "pchome": ["tpe", "臺北市大安區；導入場域在林口 A7 物流園區", "ok"], "uni7": ["tpe", "臺北市松山區、內湖區", "ok"], "kanshin": ["tpe", "臺北市中正區", "ok"], "tri": ["tpe", "臺北市士林區", "far"], "fittech": ["txg", "臺中市西屯區", "far"], "psmc": ["hsz", "新竹科學園區", "ok"], "kinik": ["tpe", "新北市鶯歌區", "far"], "winway": ["khh", "高雄市楠梓區", "far"], "sigurd": ["hsz", "新竹縣竹東鎮", "ok"], "ucs": ["hsz", "新竹市東區", "ok"], "unimicron": ["tyn", "桃園市龜山區", "near"], "hexun": ["tyn", "桃園市觀音區", "near"], "yungshin": ["txg", "臺中市大甲區", "far"], "orient": ["yun", "雲林縣虎尾鎮（中科虎尾園區）", "far"], "tit": ["khh", "高雄市路竹區（路竹科學園區）", "far"], "jordenis": ["cyi", "嘉義（佐登妮絲城堡生技園區）", "far"], "goodway": ["txg", "臺中市", "ok"], "kaosheng": ["hsz", "新竹", "far"], "chienfu": ["tpe", "新北市新莊區", "far"], "yawei": ["tyn", "桃園市楊梅區", "far"], "deta": ["txg", "臺中市神岡區", "ok"], "dynapath": ["hsz", "新竹縣竹北市", "far"], "handing": ["txg", "臺中市南屯區", "ok"], "iscom": ["txg", "臺中市西屯區", "ok"], "shen": ["tpe", "新北市土城區", "far"], "taichang": ["txg", "臺中市大甲區", "far"], "htc": ["tpe", "新北市；導入場域在國立臺灣圖書館（新北中和）", "far"], "chuanfeng": ["tpe", "臺北市大安區", "far"], "longyu": ["hsz", "新竹縣北埔鄉", "far"], "taxi": ["tpe", "臺北市", "far"], "longtai": ["chw", "彰化水五金聚落", "ok"], "kaojian": ["khh", "高雄市（橋頭科學園區新廠）", "far"], "kunzhaoyi": ["txg", "臺中市", "near"], "hesin": ["tnn", "臺南市西港區", "far"], "walsin": ["tpe", "臺北市信義區（計畫書通訊地址）", "far"], "alex": ["tnn", "臺南市山上區", "far"], "chumpower": ["txg", "臺中市烏日區", "ok"], "dongyu": ["nto", "南投縣南崗工業區", "ok"], "shihhung": ["chw", "彰化縣鹿港鎮", "near"], "greentech": ["tyn", "桃園市楊梅區", "far"], "tci": ["pif", "屏東（屏東農業生物技術園區）", "far"], "fubi": ["hsz", "新竹縣新豐鄉（一廠）、湖口鄉（二廠）", "far"], "weirong": ["txg", "臺中市", "far"], "alami": ["hsz", "新竹縣新豐鄉", "far"], "jianan": ["cyi", "嘉義縣大林鎮（大埔美園區）", "ok"], "sanxin": ["cyi", "嘉義縣大林鎮", "ok"], "chaoqin": ["tyn", "桃園市桃園區", "far"], "qiaofu": ["txg", "臺中市", "far"], "jixiang": ["chw", "彰濱工業區（彰化縣）", "near"], "zongchang": [null, "未查到公開資料", "unk"], "weichun": [null, "未查到公開資料", "unk"], "upc": ["tpe", "臺北市南港區（計畫書通訊地址）", "far"], "yfy": ["tyn", "桃園市新屋區（新屋廠）", "far"], "tyc": ["tnn", "臺南市安南區", "far"], "huangjia": [null, "未查到公開資料", "unk"], "qikui": ["tpe", "臺北市", "far"], "dongxin": ["tyn", "桃園市觀音區", "far"], "tungfeng": ["khh", "高雄市路竹區", "near"], "makalot": ["tpe", "臺北市信義區", "far"], "tainan": ["tpe", "計畫書通訊地址在臺北市中正區；公司源自台南，工廠位置待確認", "unk"], "qingda": ["khh", "高雄市（工廠在岡山）", "ok"], "infar": ["chw", "彰化縣福興鄉", "far"], "sanshing": ["tnn", "臺南市歸仁區", "near"], "jinquanyi": ["chw", "彰化縣鹿港鎮", "far"], "shinlung": ["hsz", "新竹縣湖口鄉", "far"], "sunrace": ["tyn", "桃園市蘆竹區", "far"], "ruyi": ["tnn", "臺南市（臺南科技工業區）", "far"], "ruike": ["tyn", "桃園市蘆竹區", "far"], "apc": ["khh", "高雄市小港區", "far"], "jieneng": ["tpe", "臺北市信義區", "far"], "jlx": ["khh", "高雄市梓官區", "far"], "whetron": ["hsz", "新竹縣竹北市（計畫書通訊地址）", "far"], "aidc": ["txg", "臺中市", "ok"]};
 
+/* 各島產業聚落（第一筆為島在地圖上的位置） */
+(function () { const C = {"med": [["台北", "醫學中心最密集（地圖位置）"], ["新竹竹北", "新竹生醫園區"], ["台中", "中部醫學中心"], ["台南", "南部醫學中心"], ["高雄", "南部醫學中心"]], "elec": [["台北內湖・南港", "科技園區（地圖位置）"], ["新北", "土城、汐止電子廠"], ["新竹", "竹科 IC 設計與網通"], ["桃園", "電子組裝與伺服器"]], "bio": [["新竹竹北", "新竹生醫園區（地圖位置）"], ["台北南港", "國家生技研究園區"], ["台中・雲林", "中科、虎尾製藥"], ["高雄路竹", "醫材"], ["屏東", "農業生技園區"]], "retail": [["桃園・林口", "物流倉儲樞紐（地圖位置）"], ["雙北", "總部與門市最密集"], ["台中", "中部物流中心"], ["高雄", "南部物流中心"]], "semi": [["新竹", "竹科（地圖位置）"], ["台中", "中科"], ["台南", "南科"], ["高雄", "楠梓、路竹封測與材料"], ["桃園", "PCB 與 IC 載板"]], "tool": [["台中", "精密機械聚落（地圖位置）"], ["彰化", "零組件與加工"], ["南投", "南崗工業區"], ["新竹", "專用機與控制器"]], "mob": [["台中后里・大甲", "自行車（地圖位置）"], ["彰化", "自行車零件、車燈"], ["台南", "汽車零組件、車燈"], ["桃園・新竹", "整車與車用電子"], ["高雄", "遊艇"], ["台中", "航太"]], "svc": [["花蓮", "東部文化觀光（象徵位置）"], ["雙北", "出版印刷、內容與服務業"], ["台中", "文化創意"], ["台南", "文化觀光"]], "mach": [["台中・南投", "機械設備聚落（地圖位置）"], ["彰化", "中彰投機械帶"], ["桃園", "自動化與搬運設備"]], "metal": [["彰化鹿港", "水五金（地圖位置）"], ["台南", "金屬加工"], ["高雄", "鋼鐵與金屬製品"], ["台中", "鈑金與模具"]], "chem": [["雲林麥寮", "六輕石化區（地圖位置）"], ["高雄", "林園、大社、仁武石化區"], ["台南", "化工與塑膠製品"], ["彰化", "電鍍、發泡材料"]], "food": [["嘉義", "嘉南平原農業（地圖位置）"], ["雲林・台南", "農產與食品加工"], ["屏東", "農業生技園區"], ["彰化", "農產加工"], ["桃園・新竹", "食品工廠"]], "tex": [["台南", "紡織成衣（地圖位置）"], ["彰化", "織布、織襪"], ["桃園", "染整與化纖"], ["雙北", "成衣品牌與總部"]], "fast": [["高雄岡山", "扣件「螺絲窟」（地圖位置）"], ["台南", "扣件"], ["彰化", "扣件、手工具"], ["台中太平・大里", "手工具"]]}; Object.keys(C).forEach((k) => { if (window.ISLAND_EXTRA.islands[k]) window.ISLAND_EXTRA.islands[k].clusters = C[k]; }); })();
+
 </script>
 <script>
 (function () {
@@ -1711,7 +1724,7 @@ window.ISLAND_EXTRA.real = {"xunkai": ["tpe", "臺北市內湖區（訊凱）、
 
   /* ───────── 資料索引 ───────── */
   const X = window.ISLAND_EXTRA || { islands: {}, buildings: {}, hub: {}, decor: [], taiwan: [] };
-  D.islands.forEach((i) => { const e = X.islands[i.id]; if (e) Object.assign(i, { no: e.no, xy: e.xy, loc: e.loc, crew: e.crew }); });
+  D.islands.forEach((i) => { const e = X.islands[i.id]; if (e) Object.assign(i, { no: e.no, xy: e.xy, loc: e.loc, crew: e.crew, clusters: e.clusters }); });
   D.buildings.forEach((b) => Object.assign(b, X.buildings[b.id] || {}));
   Object.assign(D.hub, { xy: X.hub.xy, loc: X.hub.loc, crew: X.hub.crew });
   const CITY = { med: '台北', elec: '內湖', bio: '竹北', retail: '林口', semi: '新竹', tool: '台中', mob: '后里', svc: '花蓮', mach: '南投', metal: '鹿港', chem: '麥寮', food: '嘉義', tex: '台南', fast: '岡山', hub: '中央山脈' };
@@ -3048,14 +3061,24 @@ window.ISLAND_EXTRA.real = {"xunkai": ["tpe", "臺北市內湖區（訊凱）、
     const i = I[b.island];
     return `<div class="sec"><h3>實際所在地</h3><div class="realbox" style="--sc:${ST[r.st].c}">${stChip(r.st)}<p class="ra">${esc(r.addr)}</p><p class="rn">${esc(i.name)}在地圖上代表${esc(COUNTY[i.id] || '')}${i.id === 'svc' ? '（象徵位置）' : ''}。</p>${r.key && PL[r.key] ? `<button class="linklike" data-go="rb:${b.id}">在地圖上看實際位置 ›</button>` : ''}</div></div>`;
   }
+  function clusterHTML(i) {
+    const cl = i.clusters || (i.loc ? [[i.loc, '']] : []);
+    const cnt = isleCounts(i);
+    const keys = Object.keys(cnt).sort((a, b) => cnt[b] - cnt[a] || PL[a].pos.z - PL[b].pos.z);
+    const unk = i.buildings.filter((b) => !(b.real && b.real.key && PL[b.real.key])).length;
+    return `<div class="cluster">
+      <div class="cl-h">產業聚落</div>
+      <ul class="cl-list">${cl.map((c, k) => `<li${k === 0 ? ' class="here"' : ''}><b>${esc(c[0])}</b>${c[1] ? `<span>${esc(c[1])}</span>` : ''}</li>`).join('')}</ul>
+      ${keys.length ? `<div class="cl-h">島上 ${i.buildings.length} 家廠商實際所在</div><div class="pchips">${keys.map((k) => `<button class="pchip" data-go="p:${k}">${esc(placeShort(k))} ${cnt[k]} 家</button>`).join('')}${unk ? `<span>另 ${unk} 家待確認</span>` : ''}</div>` : ''}
+    </div>`;
+  }
   function realIsleSec(i) {
     const c = stCount(i.buildings.map((b) => b.id));
     const parts = [`${c.ok} 家在${esc(COUNTY[i.id])}一帶`];
     if (c.near) parts.push(`${c.near} 家在隔壁縣市`);
     if (c.far) parts.push(`<b style="color:${ST.far.c}">${c.far} 家在其他地區</b>`);
     if (c.unk) parts.push(`${c.unk} 家待確認`);
-    const cnt = isleCounts(i); const dist = Object.keys(cnt).sort((a, b) => cnt[b] - cnt[a] || PL[a].pos.z - PL[b].pos.z).map((k) => `<button class="pchip" data-go="p:${k}">${esc(placeShort(k))} ${cnt[k]}</button>`).join('');
-    return `<div class="sec"><h3>廠商的實際位置</h3><p>島上 ${i.buildings.length} 家廠商中，${parts.join('、')}。</p>${stBar(c)}<div class="pchips"><span>實際分布</span>${dist}</div><button class="linklike" data-go="ri:${i.id}" style="margin-top:8px">在地圖上看連線 ›</button></div>`;
+    return `<div class="sec"><h3>廠商的實際位置</h3><p>島上 ${i.buildings.length} 家廠商中，${parts.join('、')}。</p>${stBar(c)}<button class="linklike" data-go="ri:${i.id}" style="margin-top:8px">在地圖上看連線 ›</button></div>`;
   }
   function realHTML() {
     const all = stCount(D.buildings.map((b) => b.id));
@@ -3108,7 +3131,7 @@ window.ISLAND_EXTRA.real = {"xunkai": ["tpe", "臺北市內湖區（訊凱）、
     return `${tourHead}
       <h2 class="p-title" style="--accent:${i.color}">${esc(i.name)}</h2>
       <p class="p-sub">${esc(i.tagline)}</p>
-      ${i.loc ? `<p class="locline"><span>產業聚落</span>${esc(i.loc)}</p>` : ''}
+      ${clusterHTML(i)}
       <p>${esc(i.desc)}</p>
       ${i.stat ? `<div class="sec" style="--accent:${i.color}"><h3>產業小檔案・${esc(i.stat.label)}</h3>
         <div class="stat"><div><b>${esc(i.stat.export)}</b><span>2025 出口產值</span></div><div><b>${esc(i.stat.ratio)}</b><span>出口占比</span></div><div><b>${esc(i.stat.firms)}</b><span>總廠家數</span></div></div></div>` : ''}

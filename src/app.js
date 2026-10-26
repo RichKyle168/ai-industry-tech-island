@@ -14,7 +14,7 @@
 
   /* ───────── 資料索引 ───────── */
   const X = window.ISLAND_EXTRA || { islands: {}, buildings: {}, hub: {}, decor: [], taiwan: [] };
-  D.islands.forEach((i) => { const e = X.islands[i.id]; if (e) Object.assign(i, { no: e.no, xy: e.xy, loc: e.loc, crew: e.crew }); });
+  D.islands.forEach((i) => { const e = X.islands[i.id]; if (e) Object.assign(i, { no: e.no, xy: e.xy, loc: e.loc, crew: e.crew, clusters: e.clusters }); });
   D.buildings.forEach((b) => Object.assign(b, X.buildings[b.id] || {}));
   Object.assign(D.hub, { xy: X.hub.xy, loc: X.hub.loc, crew: X.hub.crew });
   const CITY = { med: '台北', elec: '內湖', bio: '竹北', retail: '林口', semi: '新竹', tool: '台中', mob: '后里', svc: '花蓮', mach: '南投', metal: '鹿港', chem: '麥寮', food: '嘉義', tex: '台南', fast: '岡山', hub: '中央山脈' };
@@ -1351,14 +1351,24 @@
     const i = I[b.island];
     return `<div class="sec"><h3>實際所在地</h3><div class="realbox" style="--sc:${ST[r.st].c}">${stChip(r.st)}<p class="ra">${esc(r.addr)}</p><p class="rn">${esc(i.name)}在地圖上代表${esc(COUNTY[i.id] || '')}${i.id === 'svc' ? '（象徵位置）' : ''}。</p>${r.key && PL[r.key] ? `<button class="linklike" data-go="rb:${b.id}">在地圖上看實際位置 ›</button>` : ''}</div></div>`;
   }
+  function clusterHTML(i) {
+    const cl = i.clusters || (i.loc ? [[i.loc, '']] : []);
+    const cnt = isleCounts(i);
+    const keys = Object.keys(cnt).sort((a, b) => cnt[b] - cnt[a] || PL[a].pos.z - PL[b].pos.z);
+    const unk = i.buildings.filter((b) => !(b.real && b.real.key && PL[b.real.key])).length;
+    return `<div class="cluster">
+      <div class="cl-h">產業聚落</div>
+      <ul class="cl-list">${cl.map((c, k) => `<li${k === 0 ? ' class="here"' : ''}><b>${esc(c[0])}</b>${c[1] ? `<span>${esc(c[1])}</span>` : ''}</li>`).join('')}</ul>
+      ${keys.length ? `<div class="cl-h">島上 ${i.buildings.length} 家廠商實際所在</div><div class="pchips">${keys.map((k) => `<button class="pchip" data-go="p:${k}">${esc(placeShort(k))} ${cnt[k]} 家</button>`).join('')}${unk ? `<span>另 ${unk} 家待確認</span>` : ''}</div>` : ''}
+    </div>`;
+  }
   function realIsleSec(i) {
     const c = stCount(i.buildings.map((b) => b.id));
     const parts = [`${c.ok} 家在${esc(COUNTY[i.id])}一帶`];
     if (c.near) parts.push(`${c.near} 家在隔壁縣市`);
     if (c.far) parts.push(`<b style="color:${ST.far.c}">${c.far} 家在其他地區</b>`);
     if (c.unk) parts.push(`${c.unk} 家待確認`);
-    const cnt = isleCounts(i); const dist = Object.keys(cnt).sort((a, b) => cnt[b] - cnt[a] || PL[a].pos.z - PL[b].pos.z).map((k) => `<button class="pchip" data-go="p:${k}">${esc(placeShort(k))} ${cnt[k]}</button>`).join('');
-    return `<div class="sec"><h3>廠商的實際位置</h3><p>島上 ${i.buildings.length} 家廠商中，${parts.join('、')}。</p>${stBar(c)}<div class="pchips"><span>實際分布</span>${dist}</div><button class="linklike" data-go="ri:${i.id}" style="margin-top:8px">在地圖上看連線 ›</button></div>`;
+    return `<div class="sec"><h3>廠商的實際位置</h3><p>島上 ${i.buildings.length} 家廠商中，${parts.join('、')}。</p>${stBar(c)}<button class="linklike" data-go="ri:${i.id}" style="margin-top:8px">在地圖上看連線 ›</button></div>`;
   }
   function realHTML() {
     const all = stCount(D.buildings.map((b) => b.id));
@@ -1411,7 +1421,7 @@
     return `${tourHead}
       <h2 class="p-title" style="--accent:${i.color}">${esc(i.name)}</h2>
       <p class="p-sub">${esc(i.tagline)}</p>
-      ${i.loc ? `<p class="locline"><span>產業聚落</span>${esc(i.loc)}</p>` : ''}
+      ${clusterHTML(i)}
       <p>${esc(i.desc)}</p>
       ${i.stat ? `<div class="sec" style="--accent:${i.color}"><h3>產業小檔案・${esc(i.stat.label)}</h3>
         <div class="stat"><div><b>${esc(i.stat.export)}</b><span>2025 出口產值</span></div><div><b>${esc(i.stat.ratio)}</b><span>出口占比</span></div><div><b>${esc(i.stat.firms)}</b><span>總廠家數</span></div></div></div>` : ''}
