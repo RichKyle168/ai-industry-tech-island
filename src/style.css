@@ -463,3 +463,6 @@ body.real-on #legend .hint { display: none; }
 .realtop .rt-btns button { display: inline-flex; align-items: center; gap: 6px; border: 0; border-radius: 999px; padding: 7px 14px; font-size: 15px; font-weight: 700; background: #fff; color: var(--ink); box-shadow: 0 1px 0 rgba(0,0,0,.06), 0 0 0 1px var(--line); cursor: pointer; }
 .realtop .rt-btns button:first-child { background: var(--sc); color: #fff; box-shadow: none; }
 .realtop .rt-btns svg { width: 16px; height: 16px; }
+.pchips { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 8px; font-size: 13px; color: var(--ink-soft); }
+.pchip { border: 1px solid #F1B8B2; background: #FFF4F2; color: #B8352B; border-radius: 999px; padding: 2px 10px; font-size: 14px; font-weight: 700; cursor: pointer; }
+.pchip:hover { background: #E2483D; color: #fff; }

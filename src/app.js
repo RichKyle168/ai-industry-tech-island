@@ -785,6 +785,15 @@
   const PL = {};
   Object.keys(PLACES).forEach((k) => { const q = PLACES[k]; PL[k] = { key: k, name: q.name, pos: new V3(q.xy[0], 0, q.xy[1]), head: new V3(q.xy[0], PIN_H, q.xy[1]), label: new V3(q.xy[0], PIN_H + 1.6, q.xy[1]), ids: [] }; });
   D.buildings.forEach((b) => { if (b.real && b.real.key && PL[b.real.key]) PL[b.real.key].ids.push(b.id); });
+  // 島名後面的地點：先列島嶼在地圖上的代表地點，再依家數列出島上廠商實際所在的其他縣市
+  const PRIMARY = { med: 'tpe', elec: 'tpe', bio: 'hsz', retail: null, semi: 'hsz', tool: 'txg', mob: 'txg', svc: null, mach: 'nto', metal: 'chw', chem: 'yun', food: 'cyi', tex: 'tnn', fast: 'khh' };
+  const placeShort = (k) => (k === 'tpe' ? '台北' : PL[k].name);
+  function isleCounts(i) { const cnt = {}; i.buildings.forEach((b) => { const k = b.real && b.real.key; if (k && PL[k]) cnt[k] = (cnt[k] || 0) + 1; }); return cnt; }
+  function isleWhere(i) {
+    const cnt = isleCounts(i);
+    const others = Object.keys(cnt).filter((k) => k !== PRIMARY[i.id]).sort((a, b) => cnt[b] - cnt[a] || PL[a].pos.z - PL[b].pos.z);
+    return [CITY[i.id], ...others.map(placeShort)];
+  }
   const realGroup = new THREE.Group(); realGroup.visible = false; scene.add(realGroup);
   const arcGroup = new THREE.Group(); scene.add(arcGroup);
   {
@@ -1067,7 +1076,7 @@
     const el = document.createElement('button');
     el.className = 'ilabel' + (i.id === 'hub' ? ' hub' : '');
     el.style.setProperty('--c', i.color);
-    el.innerHTML = i.id === 'hub' ? `<span class="no">AI</span><span class="nm">AI 中樞島</span><span class="city">${CITY.hub}</span>` : `<span class="no">${pad2(i.no)}</span><span class="nm">${esc(i.name)}</span><span class="city">${esc(CITY[i.id] || '')}</span><span class="ct">${i.buildings.length}</span>`;
+    el.innerHTML = i.id === 'hub' ? `<span class="no">AI</span><span class="nm">AI 中樞島</span><span class="city">${CITY.hub}</span>` : `<span class="no">${pad2(i.no)}</span><span class="nm">${esc(i.name)}</span><span class="city">${isleWhere(i).map(esc).join('・')}</span><span class="ct">${i.buildings.length}</span>`;
     el.setAttribute('aria-label', i.id === 'hub' ? 'AI 中樞島' : `${pad2(i.no)} ${i.name}，${i.buildings.length} 個 AI 場域`);
     el.addEventListener('click', () => (i.id === 'hub' ? openHub() : selectIsland(i.id)));
     labelsEl.appendChild(el);
@@ -1348,7 +1357,8 @@
     if (c.near) parts.push(`${c.near} 家在隔壁縣市`);
     if (c.far) parts.push(`<b style="color:${ST.far.c}">${c.far} 家在其他地區</b>`);
     if (c.unk) parts.push(`${c.unk} 家待確認`);
-    return `<div class="sec"><h3>廠商的實際位置</h3><p>島上 ${i.buildings.length} 家廠商中，${parts.join('、')}。</p>${stBar(c)}<button class="linklike" data-go="ri:${i.id}" style="margin-top:8px">在地圖上看連線 ›</button></div>`;
+    const cnt = isleCounts(i); const dist = Object.keys(cnt).sort((a, b) => cnt[b] - cnt[a] || PL[a].pos.z - PL[b].pos.z).map((k) => `<button class="pchip" data-go="p:${k}">${esc(placeShort(k))} ${cnt[k]}</button>`).join('');
+    return `<div class="sec"><h3>廠商的實際位置</h3><p>島上 ${i.buildings.length} 家廠商中，${parts.join('、')}。</p>${stBar(c)}<div class="pchips"><span>實際分布</span>${dist}</div><button class="linklike" data-go="ri:${i.id}" style="margin-top:8px">在地圖上看連線 ›</button></div>`;
   }
   function realHTML() {
     const all = stCount(D.buildings.map((b) => b.id));
