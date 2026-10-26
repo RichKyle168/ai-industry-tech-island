@@ -771,6 +771,55 @@
     lineCache[key] = mesh; return mesh;
   }
 
+  /* ───────── 實際位置圖釘 ───────── */
+  const PLACES = X.places || {}, REAL = X.real || {};
+  D.buildings.forEach((b) => { const r = REAL[b.id]; if (r) b.real = { key: r[0], addr: r[1], st: r[2] }; });
+  const ST = {
+    ok: { t: '與島嶼位置一致', s: '一致', c: '#2E9E6A' },
+    near: { t: '在島嶼的隔壁縣市', s: '鄰近', c: '#D99A00' },
+    far: { t: '與島嶼位置不同', s: '不同', c: '#E2483D' },
+    unk: { t: '所在地待確認', s: '待確認', c: '#8A97A6' },
+  };
+  const ST_ORDER = ['far', 'near', 'ok', 'unk'];
+  const PIN_H = 12;
+  const PL = {};
+  Object.keys(PLACES).forEach((k) => { const q = PLACES[k]; PL[k] = { key: k, name: q.name, pos: new V3(q.xy[0], 0, q.xy[1]), head: new V3(q.xy[0], PIN_H, q.xy[1]), label: new V3(q.xy[0], PIN_H + 1.6, q.xy[1]), ids: [] }; });
+  D.buildings.forEach((b) => { if (b.real && b.real.key && PL[b.real.key]) PL[b.real.key].ids.push(b.id); });
+  const realGroup = new THREE.Group(); realGroup.visible = false; scene.add(realGroup);
+  const arcGroup = new THREE.Group(); scene.add(arcGroup);
+  {
+    const headMat = new THREE.MeshStandardMaterial({ color: '#E2483D', roughness: 0.35, emissive: '#6a120b', emissiveIntensity: 0.5 });
+    const stemMat = new THREE.MeshStandardMaterial({ color: '#8E2B22', roughness: 0.6 });
+    const baseMat = new THREE.MeshBasicMaterial({ color: '#E2483D', transparent: true, opacity: 0.5, depthWrite: false, side: THREE.DoubleSide });
+    const groundY = (x, z) => (cellsAll.some((c) => { const q = cellPos(c); return Math.hypot(q.x - x, q.z - z) < R * 0.86; }) ? G + 0.08 : 0.15);
+    Object.values(PL).forEach((p) => {
+      if (!p.ids.length) return;
+      const g = new THREE.Group(); g.position.copy(p.pos);
+      const gy = groundY(p.pos.x, p.pos.z);
+      const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.15, PIN_H - gy, 8), stemMat); stem.position.y = gy + (PIN_H - gy) / 2; g.add(stem);
+      const head = new THREE.Mesh(new THREE.SphereGeometry(1.05, 18, 12), headMat); head.position.y = PIN_H; head.castShadow = true; g.add(head);
+      const tip = new THREE.Mesh(new THREE.ConeGeometry(0.55, 1.2, 12), headMat); tip.rotation.x = Math.PI; tip.position.y = PIN_H - 1.05; g.add(tip);
+      const base = new THREE.Mesh(new THREE.RingGeometry(0.5, 1.7, 28), baseMat); base.rotation.x = -Math.PI / 2; base.position.y = gy; g.add(base);
+      const hit = new THREE.Mesh(new THREE.CylinderGeometry(1.6, 1.6, PIN_H + 2, 8), hitMat); hit.position.y = (PIN_H + 2) / 2; hit.userData = { kind: 'place', id: p.key }; g.add(hit); hitMeshes.push(hit);
+      realGroup.add(g); p.group = g;
+    });
+  }
+  const arcMats = {}; Object.keys(ST).forEach((k) => { arcMats[k] = new THREE.MeshBasicMaterial({ color: ST[k].c, transparent: true, opacity: 0.92 }); });
+  const arcDotGeo = new THREE.SphereGeometry(0.42, 10, 8);
+  function clearArcs() { arcGroup.children.slice().forEach((m) => { if (m.geometry !== arcDotGeo) m.geometry.dispose(); arcGroup.remove(m); }); }
+  function showArcs(ids) {
+    clearArcs();
+    ids.forEach((id) => {
+      const b = B[id]; if (!b.real || !PL[b.real.key]) return;
+      const a = BP[id].top.clone(), z = PL[b.real.key].head.clone().add(new V3(0, -1.1, 0));
+      const d = a.distanceTo(z);
+      const mid = a.clone().add(z).multiplyScalar(0.5); mid.y = Math.max(a.y, z.y) + 2.5 + d * 0.22;
+      const curve = new THREE.QuadraticBezierCurve3(a, mid, z);
+      arcGroup.add(new THREE.Mesh(new THREE.TubeGeometry(curve, Math.max(16, Math.round(d * 1.2)), 0.17, 6, false), arcMats[b.real.st]));
+      const dot = new THREE.Mesh(arcDotGeo, arcMats[b.real.st]); dot.position.copy(a); arcGroup.add(dot);
+    });
+  }
+
   /* ───────── 時間 ───────── */
   const TIMES = [
     { key: 'day', label: '白天', top: '#5AAEEA', horizon: '#CFEAF7', bottom: '#A6D8EA', sun: [0.42, 0.82, 0.38], sunColor: '#FFF4E0', sunI: 2.3, hs: '#DDF0FF', hg: '#A7C79A', hi: 1.05, deep: '#2B8DB3', shallow: '#62D1D6', foam: '#FFFFFF', lagoon: '#83D9C9', sand: '#EEDDB2', win: 0, stars: 0, beam: 0 },
@@ -962,9 +1011,9 @@
   function rayHit(cx, cy) {
     const ndc = new THREE.Vector2((cx / window.innerWidth) * 2 - 1, -(cy / window.innerHeight) * 2 + 1);
     raycaster.setFromCamera(ndc, camera);
-    const hits = raycaster.intersectObjects(hitMeshes, false);
+    const hits = raycaster.intersectObjects(hitMeshes, false).filter((h) => h.object.userData.kind !== 'place' || state.real);
     if (!hits.length) return null;
-    const b = hits.find((h) => h.object.userData.kind === 'npc' || h.object.userData.kind === 'bot') || hits.find((h) => h.object.userData.kind === 'b');
+    const b = hits.find((h) => h.object.userData.kind === 'npc' || h.object.userData.kind === 'bot' || h.object.userData.kind === 'place') || hits.find((h) => h.object.userData.kind === 'b');
     if (b && b.distance - hits[0].distance < 6) return b.object.userData;
     return hits[0].object.userData;
   }
@@ -973,6 +1022,7 @@
     if (!u) return;
     if (u.kind === 'bot') { showBubble(); return; }
     if (u.kind === 'npc') { talkNPC(u.idx); return; }
+    if (u.kind === 'place') { openPlace(u.id); return; }
     if (u.kind === 'b') { selectBuilding(u.id, { from: 'map' }); return; }
     if (u.kind === 'hub') { openHub(); return; }
     if (u.kind === 'i') { selectIsland(u.id); }
@@ -989,6 +1039,7 @@
     else if (u.kind === 'hub') txt = '<b>AI 中樞島</b><br>三大計畫怎麼推動 AI';
     else if (u.kind === 'bot') txt = '<b>小智</b><br>點我開始導覽';
     else if (u.kind === 'npc') { const n = npcs[u.idx]; txt = `<b>${esc(n.sp.role)}</b><br>點我聊聊 AI 轉型`; }
+    else if (u.kind === 'place') { const q = PL[u.id]; txt = `<b>${esc(q.name)}</b><br>${q.ids.length} 家廠商實際在這裡`; }
     tip.innerHTML = txt; tip.style.display = 'block'; tip.style.left = e.clientX + 'px'; tip.style.top = e.clientY + 'px';
   }
 
@@ -1009,6 +1060,15 @@
     const el = document.createElement('span'); el.className = 'dlabel'; el.textContent = d.name; labelsEl.appendChild(el);
     islandLabels.push({ el, pos: d.label, id: 'decor:' + d.name, w: 0, h: 0, decor: true });
   });
+  Object.values(PL).forEach((p) => {
+    if (!p.ids.length) return;
+    const el = document.createElement('button'); el.className = 'plabel hide';
+    el.innerHTML = `<span>${esc(p.name)}</span><b>${p.ids.length}</b>`;
+    el.setAttribute('aria-label', `${p.name}：${p.ids.length} 家廠商的實際所在地`);
+    el.addEventListener('click', () => openPlace(p.key));
+    labelsEl.appendChild(el);
+    islandLabels.push({ el, pos: p.label, id: 'place:' + p.key, w: 0, h: 0, place: true });
+  });
   let bLabels = [];
   function setBuildingLabels(islandId) {
     bLabels.forEach((l) => l.el.remove()); bLabels = [];
@@ -1027,7 +1087,7 @@
   function updateLabels() {
     const w = window.innerWidth, h = window.innerHeight;
     const placed = [];
-    const all = bLabels.map((l) => ({ ...l, pri: state.building === l.id ? 0 : 1 })).concat(islandLabels.map((l) => ({ ...l, pri: l.decor ? 3 : (state.island === l.id ? 0.5 : 2) })));
+    const all = bLabels.map((l) => ({ ...l, pri: state.building === l.id ? 0 : 1 })).concat(islandLabels.filter((l) => { if (l.place && !state.real) { l.el.classList.add('hide'); return false; } return true; }).map((l) => ({ ...l, pri: l.place ? (state.place === l.id.slice(6) ? 0.2 : 0.4) : l.decor ? 3 : (state.island === l.id ? 0.5 : 2) })));
     all.sort((a, b) => a.pri - b.pri);
     all.forEach((l) => {
       pv.copy(l.pos).project(camera);
@@ -1093,7 +1153,7 @@
   }
 
   /* ───────── 狀態與選取 ───────── */
-  const state = { island: null, building: null, line: null, allLines: false, query: '', tour: null };
+  const state = { island: null, building: null, line: null, allLines: false, query: '', tour: null, real: false, place: null };
   function refreshPins() {
     const list = [];
     if (state.line) L[state.line].members.forEach((id) => list.push({ id, color: L[state.line].color }));
@@ -1118,6 +1178,7 @@
     focusIsland(id);
     const c = IP[id].center;
     if (!opts.noFly) flyTo(islandView(id));
+    state.place = null; if (state.real) showArcs(I[id].buildings.map((b) => b.id)); else clearArcs();
     openPanel('island', id, opts);
     setHash('i-' + id);
   }
@@ -1129,6 +1190,7 @@
     selPin.visible = true;
     const p = BP[id].pos;
     if (!opts.noFly) { const v = fitPoints(hexPoints(p, 12, 6), 0.88, ctl.az, 1.15); v.dist = clamp(v.dist, 34, 100); flyTo(v); }
+    state.place = null; if (state.real) showArcs([id]); else clearArcs();
     openPanel('building', id, opts);
     setHash('b-' + id);
   }
@@ -1170,6 +1232,7 @@
   }
   function closePanel() {
     document.body.classList.remove('panel-open'); current = null; navStack = []; stopSpeak();
+    clearArcs(); state.place = null;
     if (state.tour) endTour();
     clearSelection(); setHash('');
     setTimeout(measureOcc, 30); setTimeout(measureOcc, 400);
@@ -1186,6 +1249,8 @@
     else if (kind === 'line') html = lineHTML(L[id]);
     else if (kind === 'lines') html = linesHTML();
     else if (kind === 'hub') html = hubHTML();
+    else if (kind === 'real') html = realHTML();
+    else if (kind === 'place') html = placeHTML(id);
     pBody.innerHTML = html;
   }
   $('#pClose').addEventListener('click', closePanel);
@@ -1195,6 +1260,8 @@
     if (prev.kind === 'building') selectBuilding(prev.id, { replace: true });
     else if (prev.kind === 'island') selectIsland(prev.id, { replace: true });
     else if (prev.kind === 'line') openLine(prev.id, { replace: true });
+    else if (prev.kind === 'place') openPlace(prev.id, { replace: true });
+    else if (prev.kind === 'real') openReal({ replace: true });
     else { current = prev; render(); }
     $('#pBack').hidden = navStack.length === 0;
   });
@@ -1218,6 +1285,10 @@
     else if (k === 'about') openAbout();
     else if (k === 'all') { setAllLines(!state.allLines); render(); }
     else if (k === 'clearline') { selectLine(null); render(); }
+    else if (k === 'p') openPlace(v);
+    else if (k === 'real') openReal();
+    else if (k === 'ri') realIsland(v);
+    else if (k === 'rb') realBuilding(v);
   });
 
   const kpiHTML = (k) => `<div class="kpi"><b>${esc(k[0])}</b><span>${esc(k[1])}</span></div>`;
@@ -1229,8 +1300,48 @@
     lines: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5" cy="17" r="2.5"/><circle cx="19" cy="17" r="2.5"/><circle cx="12" cy="6" r="2.5"/><path d="M6.5 15 10 8M17.5 15 14 8M7.5 17.5h9" stroke-dasharray="2 2.2"/></svg>',
     list: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6h11M9 12h11M9 18h11M4 6h1M4 12h1M4 18h1"/></svg>',
     hub: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v3M10 21l1-12h2l1 12M7 21h10"/><circle cx="12" cy="7" r="2"/></svg>',
+    pin: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-6-5.6-6-11a6 6 0 0 1 12 0c0 5.4-6 11-6 11z"/><circle cx="12" cy="10" r="2.3"/></svg>',
   };
 
+  const COUNTY = { med: '台北', elec: '台北', bio: '新竹', retail: '桃園・新北', semi: '新竹', tool: '台中', mob: '台中', svc: '花蓮', mach: '台中・南投', metal: '彰化', chem: '雲林', food: '嘉義', tex: '台南', fast: '高雄' };
+  const stCount = (ids) => { const c = { ok: 0, near: 0, far: 0, unk: 0 }; ids.forEach((id) => { const r = B[id].real; c[r ? r.st : 'unk']++; }); return c; };
+  const stBar = (c) => { const n = (c.ok + c.near + c.far + c.unk) || 1; return `<div class="stbar" role="img" aria-label="${ST_ORDER.map((k) => `${ST[k].s} ${c[k]}`).join('、')}">${ST_ORDER.map((k) => (c[k] ? `<i style="width:${(c[k] / n * 100).toFixed(1)}%;background:${ST[k].c}"></i>` : '')).join('')}</div>`; };
+  const stChip = (st) => `<span class="stchip" style="--sc:${ST[st].c}"><i></i>${ST[st].t}</span>`;
+  function realSec(b) {
+    const r = b.real; if (!r) return '';
+    const i = I[b.island];
+    return `<div class="sec"><h3>實際所在地</h3><div class="realbox" style="--sc:${ST[r.st].c}">${stChip(r.st)}<p class="ra">${esc(r.addr)}</p><p class="rn">${esc(i.name)}在地圖上代表${esc(COUNTY[i.id] || '')}${i.id === 'svc' ? '（象徵位置）' : ''}。</p>${r.key && PL[r.key] ? `<button class="linklike" data-go="rb:${b.id}">在地圖上看實際位置 ›</button>` : ''}</div></div>`;
+  }
+  function realIsleSec(i) {
+    const c = stCount(i.buildings.map((b) => b.id));
+    const parts = [`${c.ok} 家在${esc(COUNTY[i.id])}一帶`];
+    if (c.near) parts.push(`${c.near} 家在隔壁縣市`);
+    if (c.far) parts.push(`<b style="color:${ST.far.c}">${c.far} 家在其他地區</b>`);
+    if (c.unk) parts.push(`${c.unk} 家待確認`);
+    return `<div class="sec"><h3>廠商的實際位置</h3><p>島上 ${i.buildings.length} 家廠商中，${parts.join('、')}。</p>${stBar(c)}<button class="linklike" data-go="ri:${i.id}" style="margin-top:8px">在地圖上看連線 ›</button></div>`;
+  }
+  function realHTML() {
+    const all = stCount(D.buildings.map((b) => b.id));
+    const places = Object.values(PL).filter((q) => q.ids.length).sort((a, b) => b.ids.length - a.ids.length);
+    return `<div class="eyebrow">實際位置</div>
+      <h2 class="p-title">廠商實際在哪裡？</h2>
+      <p class="p-sub">島嶼按產業排列，紅色圖釘標出廠商真正所在的縣市</p>
+      <p>同一個產業的廠商其實散布在全台各地。點圖釘看那裡有哪些廠商，彩色連線會連到它們在島上的建築。</p>
+      <div class="tiles four">${ST_ORDER.map((k) => `<div class="tile"><b style="color:${ST[k].c}">${all[k]}</b><span>${ST[k].s}</span></div>`).join('')}</div>
+      <div class="legend-st">${ST_ORDER.map((k) => `<span><i style="background:${ST[k].c}"></i>${ST[k].t}</span>`).join('')}</div>
+      <div class="sec"><h3>各地圖釘</h3><div class="placelist">${places.map((q) => `<button class="prow" data-go="p:${q.key}"><span class="pin-ic">${ICON.pin}</span><b>${esc(q.name)}</b><span class="pn">${q.ids.length} 家</span>${stBar(stCount(q.ids))}</button>`).join('')}</div></div>
+      <div class="sec"><h3>各島廠商的實際位置</h3><div class="placelist">${ISLES.map((i) => { const c = stCount(i.buildings.map((b) => b.id)); return `<button class="prow" data-go="ri:${i.id}"><span class="no" style="background:${i.color}">${pad2(i.no)}</span><b>${esc(i.name)}</b><span class="pn">${c.far ? `${c.far} 家在外地` : '大致在地'}</span>${stBar(c)}</button>`; }).join('')}</div></div>
+      <p class="note">所在地依據：躍昇計畫用計畫書摘要上的通訊地址；示範場域用公開的公司登記或徵才資料。多半是總部地址，工廠可能在別處。「一致」指與島嶼代表的縣市相同；文創服務島放在花蓮是象徵位置，所以島上廠商都標為不同。</p>`;
+  }
+  function placeHTML(key) {
+    const q = PL[key]; const c = stCount(q.ids);
+    const groups = ST_ORDER.map((k) => [k, q.ids.filter((id) => B[id].real.st === k)]).filter((g) => g[1].length);
+    return `<div class="eyebrow"><button data-go="real">實際位置</button><span>${q.ids.length} 家廠商</span></div>
+      <h2 class="p-title"><span class="pin-ic big">${ICON.pin}</span>${esc(q.name)}</h2>
+      <p class="p-sub">這些廠商的總部或工廠在${esc(q.name)}</p>
+      ${stBar(c)}
+      ${groups.map(([k, ids]) => `<div class="sec"><h3>${ST[k].t}・${ids.length}</h3><div class="cards">${ids.map((id) => { const b = B[id], i = I[b.island]; return `<button class="card rcard" data-go="b:${id}" style="--sc:${ST[k].c}"><span class="c-top"><span class="isle"><i style="background:${i.color}"></i>${pad2(i.no)} ${esc(i.name)}（${esc(COUNTY[i.id] || '')}）</span></span><b>${esc(b.co)}</b><span class="c-short">${esc(b.real.addr)}</span></button>`; }).join('')}</div></div>`).join('')}`;
+  }
   function homeHTML() {
     return `<div class="eyebrow">歡迎上島</div>
       <h2 class="p-title">AI產業技術島</h2>
@@ -1244,6 +1355,7 @@
       <div class="btns">
         <button class="btn pri" data-go="tour">${ICON.tour}<span>跟著小智逛一圈<small>從 01 ${esc(ISLES[0].name)}出發，一共 ${STOPS.length} 站</small></span></button>
         <button class="btn" data-go="lines">${ICON.lines}<span>打開技術協作線<small>看 ${D.lines.length} 種 AI 技術怎麼串起各島</small></span></button>
+        <button class="btn" data-go="real">${ICON.pin}<span>看廠商的實際位置<small>用圖釘標出廠商真正在哪個縣市</small></span></button>
         <button class="btn" data-go="hub">${ICON.hub}<span>認識 AI 中樞島<small>試產線、創新、平台三大計畫</small></span></button>
         <button class="btn" data-go="list">${ICON.list}<span>用清單瀏覽全部場域<small>適合快速查找與比較</small></span></button>
       </div>
@@ -1266,6 +1378,7 @@
       ${demos.length ? `<div class="sec" style="--accent:var(--demo)"><h3>示範場域・${demos.length}</h3><div class="cards">${demos.map((b) => cardHTML(b)).join('')}</div></div>` : ''}
       ${leaps.length ? `<div class="sec" style="--accent:var(--leap)"><h3>躍昇計畫・${leaps.length}</h3><div class="cards">${leaps.map((b) => cardHTML(b)).join('')}</div></div>` : ''}
       ${lines.length ? `<div class="sec"><h3>經過這座島的協作線</h3><div class="linechips">${lines.map(lineChip).join('')}</div></div>` : ''}
+      ${realIsleSec(i)}
       ${crewHTML(i.crew, i.id)}`;
   }
   function crewHTML(crew, islId) {
@@ -1298,6 +1411,7 @@
       <p class="p-sub">${esc(b.title)}</p>
       <p class="lead">${esc(b.short)}</p>
       ${b.pos ? `<div class="sec"><h3>產業（業者）定位</h3><p>${esc(b.pos)}</p></div>` : ''}
+      ${realSec(b)}
       ${b.pain ? `<div class="sec"><h3>急需 AI 升級轉型的痛點</h3><p>${esc(b.pain)}</p></div>` : ''}
       ${stepsHTML(b)}
       ${(b.kpi && b.kpi.length) || (b.gain && b.gain.length) || (b.timeline && b.timeline.length) ? `<div class="sec"><h3>預期效益</h3>${b.kpi && b.kpi.length ? `<div class="kpis">${b.kpi.map(kpiHTML).join('')}</div>` : ''}${!(b.kpi && b.kpi.length) && b.gain && b.gain.length ? `<ul class="gains">${b.gain.map((g) => `<li>${esc(g)}</li>`).join('')}</ul><p class="hint-s" style="margin-top:6px !important">計畫未列量化指標，依計畫內容整理。</p>` : ''}${b.timeline && b.timeline.length ? `<div class="sb-cap" style="margin-top:12px">時程</div><div class="tl">${b.timeline.map((t) => `<div><b>${esc(t[0])}</b><span>${esc(t[1])}</span></div>`).join('')}</div>` : ''}</div>` : ''}
@@ -1351,6 +1465,44 @@
     const v = fitPoints(pts, 0.82, 0, 1.08); v.dist = clamp(v.dist, 50, maxDist()); flyTo(v);
   }
   function openLines() { openPanel('lines', null); if (!state.line && !state.allLines) setAllLines(true); }
+  function setReal(on) {
+    state.real = on; realGroup.visible = on;
+    if (!on) { clearArcs(); state.place = null; }
+    $('#btnReal').setAttribute('aria-pressed', String(on));
+    document.body.classList.toggle('real-on', on);
+  }
+  function placePoints(keys, ids) {
+    const pts = [];
+    keys.forEach((k) => { const q = PL[k]; pts.push(q.pos.clone(), q.head.clone().add(new V3(0, 2.5, 0))); });
+    (ids || []).forEach((id) => pts.push(...hexPoints(BP[id].pos, 3, 7)));
+    return pts;
+  }
+  function openReal(opts) {
+    setReal(true); clearArcs(); state.place = null; clearSelection();
+    openPanel('real', null, opts); setHash('real');
+    flyTo(homeView(), 1100);
+  }
+  function openPlace(key, opts) {
+    const q = PL[key]; if (!q) return;
+    setReal(true); state.building = null; selPin.visible = false; focusIsland(null); refreshPins();
+    state.place = key; showArcs(q.ids);
+    openPanel('place', key, opts); setHash('p-' + key);
+    const v = fitPoints(placePoints([key], q.ids), 0.8, ctl.az, 1.15); v.dist = clamp(v.dist, 50, maxDist()); flyTo(v, 1100);
+  }
+  function realBuilding(id) {
+    const b = B[id]; if (!b.real || !PL[b.real.key]) return;
+    setReal(true); showArcs([id]);
+    const v = fitPoints(placePoints([b.real.key], [id]), 0.8, ctl.az, 1.25); v.dist = clamp(v.dist, 45, maxDist()); flyTo(v, 1100);
+  }
+  function realIsland(id) {
+    const ids = I[id].buildings.map((b) => b.id); setReal(true); showArcs(ids);
+    const keys = [...new Set(ids.map((x) => B[x].real && B[x].real.key).filter((k) => k && PL[k]))];
+    const v = fitPoints(placePoints(keys, ids).concat(hexPoints(IP[id].center, R, 6)), 0.8, ctl.az, 1.15); v.dist = clamp(v.dist, 50, maxDist()); flyTo(v, 1100);
+  }
+  $('#btnReal').addEventListener('click', () => {
+    if (state.real) { const k = current && current.kind; setReal(false); if (k === 'real' || k === 'place') { openPanel('home', null, { resetHistory: true }); setHash(''); } }
+    else openReal();
+  });
   function openHub() {
     clearSelection(); focusIsland('hub');
     const c = IP.hub.center;
@@ -1492,6 +1644,8 @@
     if (h.startsWith('i-') && I[h.slice(2)]) { selectIsland(h.slice(2)); return true; }
     if (h.startsWith('l-') && L[h.slice(2)]) { openLine(h.slice(2)); return true; }
     if (h === 'hub') { openHub(); return true; }
+    if (h === 'real') { openReal(); return true; }
+    if (h.startsWith('p-') && PL[h.slice(2)]) { openPlace(h.slice(2)); return true; }
     if (h === 'tour') { startTour(0); return true; }
     if (h === 'list') { openList(); return false; }
     return false;

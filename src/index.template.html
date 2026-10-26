@@ -69,6 +69,9 @@
 </header>
 
 <div id="mapctl">
+  <button id="btnReal" title="廠商實際位置" aria-label="顯示廠商實際位置" aria-pressed="false">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 21s-6-5.6-6-11a6 6 0 0 1 12 0c0 5.4-6 11-6 11z"/><circle cx="12" cy="10" r="2.3"/></svg>
+  </button>
   <button id="btnReset" title="回到全景" aria-label="回到全景">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
   </button>
@@ -82,6 +85,7 @@
 <div id="legend">
   <span><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="11" width="18" height="10" rx="1.5" fill="#FFF3E0" stroke="#C9A27C"/><path d="M3 11l6-5v5l6-5v5l6-5v5z" fill="#E8742A"/></svg>示範場域</span>
   <span><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="5" width="12" height="16" rx="1" fill="#EEF3FA" stroke="#8FA9C9"/><rect x="5" y="3.5" width="14" height="3" rx="1" fill="#2F6FD0"/><path d="M8 10h8M8 14h8M8 18h8" stroke="#7DB3E8" stroke-width="2"/></svg>躍昇計畫</span>
+  <span class="leg-real"><i style="background:#2E9E6A"></i>一致<i style="background:#D99A00"></i>鄰近<i style="background:#E2483D"></i>不同</span>
   <span class="hint">拖曳移動・滾輪縮放・右鍵旋轉</span>
 </div>
 
@@ -138,6 +142,8 @@
     <p>每座島依該產業在台灣的主要聚落擺放成 Q 版地圖，例如半導體在新竹科學園區、工具機在台中、水五金在彰化鹿港、石化在雲林麥寮、紡織在台南、扣件在高雄岡山；海面下的淺灘就是台灣本島的輪廓，中央山脈是 AI 中樞島。文創服務島放在花蓮，代表東部的文化觀光，屬象徵位置。</p>
     <h3>島上的人</h3>
     <p>每座島有三位穿著產業制服的人偶在步道上走動（無塵衣、實驗袍、工作服配反光背心、防火衣、斗笠……），點他們會說出這個產業最想用 AI 解決的問題。</p>
+    <h3>實際位置</h3>
+    <p>按右下角的圖釘按鈕，會在地圖上用紅色圖釘標出每家廠商真正所在的縣市，並用綠、黃、紅三色連線標示和島嶼位置一致、在隔壁縣市或不同。所在地依據計畫書摘要的通訊地址，以及公開的公司登記或徵才資料，多半是總部地址。</p>
     <h3>資料來源</h3>
     <ul>
       <li>AI 技術幕僚辦公室〈AI發展策略暨整合示範場域構思（草案）〉，2026.09.24</li>
