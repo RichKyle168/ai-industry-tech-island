@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>AI產業技術島</title>
+<meta name="description" content="把台灣 AI 整合示範場域與 AI 應用躍昇計畫，變成 14 座可以自由探索的產業島：89 個 AI 場域、17 條技術協作線。">
+<meta name="theme-color" content="#CFEAF7">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2040%2040%22%3E%3Cpath%20d%3D%22M20%203%2035%2011.5v17L20%2037%205%2028.5v-17z%22%20fill%3D%22%238CC665%22%20stroke%3D%22%234E8A3A%22%20stroke-width%3D%222%22/%3E%3Cpath%20d%3D%22M5%2028.5%2020%2037l15-8.5%22%20fill%3D%22none%22%20stroke%3D%22%23E5CF9D%22%20stroke-width%3D%223%22/%3E%3Crect%20x%3D%2212.5%22%20y%3D%2215%22%20width%3D%226%22%20height%3D%2211%22%20rx%3D%221%22%20fill%3D%22%232F6FD0%22/%3E%3Cpath%20d%3D%22M20.5%2026v-7l3.5%202.8V19l3.5%202.8V26z%22%20fill%3D%22%23E8742A%22/%3E%3C/svg%3E">
+<meta property="og:type" content="website">
+<meta property="og:title" content="AI產業技術島">
+<meta property="og:description" content="14 座產業島、89 個 AI 場域：點島、點建築、點島上的人，看台灣各產業怎麼用 AI 升級轉型。">
+<meta property="og:image" content="https://ai-industry-tech-island.vercel.app/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&amp;display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Huninn&amp;display=swap">
+<style>
+/*__CSS__*/
+</style>
+</head>
+<body>
+<canvas id="scene" tabindex="0" aria-label="AI產業技術島 3D 地圖：拖曳移動、雙指或滾輪縮放，點選島嶼與建築查看內容"></canvas>
+<div id="labels" aria-hidden="false"></div>
+<div id="bubble" role="dialog" aria-live="polite"></div>
+<div id="tip"></div>
+
+<div id="loading">
+  <div class="load-box">
+    <svg class="load-hex" viewBox="0 0 64 64" aria-hidden="true"><path d="M32 4 56 18v28L32 60 8 46V18z" fill="#8CC665" stroke="#5E9A45" stroke-width="3"/><rect x="22" y="26" width="9" height="14" rx="1.5" fill="#2F6FD0"/><path d="M34 40V30l5 4v-4l5 4v6z" fill="#E8742A"/></svg>
+    <p>島嶼浮出水面中…</p>
+    <small>正在準備 14 座產業島</small>
+  </div>
+</div>
+
+<header id="topbar">
+  <button class="brand" id="homeBtn" aria-label="回到首頁說明">
+    <svg viewBox="0 0 40 40" aria-hidden="true"><path d="M20 3 35 11.5v17L20 37 5 28.5v-17z" fill="#8CC665" stroke="#4E8A3A" stroke-width="2"/><path d="M5 28.5 20 37l15-8.5" fill="none" stroke="#E5CF9D" stroke-width="3"/><rect x="12.5" y="15" width="6" height="11" rx="1" fill="#2F6FD0"/><path d="M20.5 26v-7l3.5 2.8V19l3.5 2.8V26z" fill="#E8742A"/><circle cx="15.5" cy="12" r="1.6" fill="#FF8A3D"/></svg>
+    <span><span class="brand-name">AI產業技術島</span><span class="brand-sub" id="brandSub">14 座產業島・89 個 AI 場域</span></span>
+  </button>
+  <div class="search" id="search">
+    <svg class="s-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+    <input id="q" type="search" autocomplete="off" placeholder="搜尋：瑕疵檢測、排程、扣件、醫療…" aria-label="搜尋公司、技術或產業">
+    <button class="s-clear" id="qClear" aria-label="清除搜尋">×</button>
+    <div id="results" role="listbox" aria-label="搜尋結果"></div>
+  </div>
+  <nav class="actions" aria-label="功能">
+    <button class="act only-m" id="btnSearch" aria-pressed="false" title="搜尋" aria-label="搜尋">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+    </button>
+    <button class="act" id="btnLines" aria-pressed="false" title="技術協作線">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="5" cy="17" r="2.5"/><circle cx="19" cy="17" r="2.5"/><circle cx="12" cy="6" r="2.5"/><path d="M6.5 15C8 9 9.5 8 10 7.5M17.5 15C16 9 14.5 8 14 7.5M7.5 17.5h9" stroke-dasharray="2 2.2"/></svg>
+      <span class="lbl">協作線</span>
+    </button>
+    <button class="act" id="btnList" title="清單模式">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1.3" fill="currentColor"/><circle cx="4.5" cy="12" r="1.3" fill="currentColor"/><circle cx="4.5" cy="18" r="1.3" fill="currentColor"/></svg>
+      <span class="lbl">清單</span>
+    </button>
+    <button class="act" id="btnTime" title="切換時間">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"/></svg>
+      <span class="lbl" id="timeLbl">白天</span>
+    </button>
+    <button class="act hide-m" id="btnAbout" title="關於本站">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></svg>
+      <span class="lbl">關於</span>
+    </button>
+  </nav>
+</header>
+
+<div id="mapctl">
+  <button id="btnReset" title="回到全景" aria-label="回到全景">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
+  </button>
+  <button class="zoomctl" id="btnZin" title="放大" aria-label="放大">＋</button>
+  <button class="zoomctl" id="btnZout" title="縮小" aria-label="縮小">−</button>
+  <button class="zoomctl" id="btnRot" title="旋轉視角" aria-label="旋轉視角">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.3-5.6M20 4v4.5h-4.5"/></svg>
+  </button>
+</div>
+
+<div id="legend">
+  <span><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="11" width="18" height="10" rx="1.5" fill="#FFF3E0" stroke="#C9A27C"/><path d="M3 11l6-5v5l6-5v5l6-5v5z" fill="#E8742A"/></svg>示範場域</span>
+  <span><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="5" width="12" height="16" rx="1" fill="#EEF3FA" stroke="#8FA9C9"/><rect x="5" y="3.5" width="14" height="3" rx="1" fill="#2F6FD0"/><path d="M8 10h8M8 14h8M8 18h8" stroke="#7DB3E8" stroke-width="2"/></svg>躍昇計畫</span>
+  <span class="hint">拖曳移動・滾輪縮放・右鍵旋轉</span>
+</div>
+
+<aside id="panel" aria-live="polite" aria-label="資訊面板">
+  <div class="p-bar">
+    <button class="grab" id="grab" aria-label="展開或收合面板"></button>
+    <button class="p-back" id="pBack" hidden aria-label="返回">‹ 返回</button>
+    <span class="sp"></span>
+    <button class="p-speak" id="pSpeak" hidden aria-label="朗讀這一頁">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4zM16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg><span id="speakLbl">朗讀</span>
+    </button>
+    <button class="p-close" id="pClose" aria-label="關閉面板">✕</button>
+  </div>
+  <div class="p-body" id="pBody"></div>
+</aside>
+
+<div id="tourbar" role="toolbar" aria-label="導覽控制">
+  <button id="tPrev" aria-label="上一座島">‹</button>
+  <span class="t-pos" id="tPos">1 / 15</span>
+  <button id="tNext" aria-label="下一座島">›</button>
+  <button id="tAuto" aria-pressed="false">自動</button>
+  <button id="tEnd">結束導覽</button>
+</div>
+
+<section id="list" aria-label="清單模式">
+  <div class="l-head">
+    <h2>全部 AI 場域清單</h2>
+    <div class="seg" id="lGroup" role="group" aria-label="分組方式">
+      <button aria-pressed="true" data-g="island">依島嶼</button>
+      <button aria-pressed="false" data-g="line">依協作線</button>
+    </div>
+    <div class="seg" id="lType" role="group" aria-label="類型篩選">
+      <button aria-pressed="true" data-t="all">全部</button>
+      <button aria-pressed="false" data-t="demo">示範場域</button>
+      <button aria-pressed="false" data-t="leap">躍昇計畫</button>
+    </div>
+    <button class="l-close" id="lClose">回到島上</button>
+  </div>
+  <div class="l-body" id="lBody"></div>
+</section>
+
+<section id="about" aria-label="關於本站">
+  <div class="ab-box">
+    <h2>關於 AI產業技術島</h2>
+    <p>把一份份 AI 計畫簡報，變成一座可以逛的群島。14 座產業島依產業聚落的大致位置拼成台灣的形狀，島上每一棟小建築就是一個 AI 場域；中間的 AI 中樞島，代表支撐這些場域的試產線、創新（GAI）與平台三大計畫。</p>
+    <h3>兩種建築</h3>
+    <ul>
+      <li><b>示範場域</b>（橘色鋸齒屋頂工廠）：AI 整合示範場域 Demo Site，由法人與業者合作，在實際產線落地。</li>
+      <li><b>躍昇計畫</b>（藍色屋頂大樓）：經濟部產業技術司「AI應用躍昇計畫」審查通過的企業研發案。</li>
+    </ul>
+    <h3>技術協作線</h3>
+    <p>同一種 AI 技術常常在不同產業重複出現。打開協作線，可以看到「AI 視覺辨識」「配方生成」「知識助理」等能力怎麼串起不同島嶼，也代表一個場域的成果可以擴散到哪裡。</p>
+    <h3>島嶼位置</h3>
+    <p>每座島依該產業在台灣的主要聚落擺放成 Q 版地圖，例如半導體在新竹科學園區、工具機在台中、水五金在彰化鹿港、石化在雲林麥寮、紡織在台南、扣件在高雄岡山；海面下的淺灘就是台灣本島的輪廓，中央山脈是 AI 中樞島。文創服務島放在花蓮，代表東部的文化觀光，屬象徵位置。</p>
+    <h3>島上的人</h3>
+    <p>每座島有三位穿著產業制服的人偶在步道上走動（無塵衣、實驗袍、工作服配反光背心、防火衣、斗笠……），點他們會說出這個產業最想用 AI 解決的問題。</p>
+    <h3>資料來源</h3>
+    <ul>
+      <li>AI 技術幕僚辦公室〈AI發展策略暨整合示範場域構思（草案）〉，2026.09.24</li>
+      <li>各法人 AI 整合示範場域 Demo Site 一頁簡報（2026 年 6–9 月）</li>
+      <li>經濟部產業技術司〈A+企業創新研發淬鍊計畫報告案－AI應用躍昇計畫〉，115.7.21，及各案計畫書摘要</li>
+      <li>部分業者定位以公開新聞與公司網站補充，於該場域頁面下方列出來源連結</li>
+    </ul>
+    <p style="margin-top:10px">內容為規劃與審查階段資訊，成效數字為各案預期目標，實際以計畫執行結果為準。產業出口數據取自上述簡報之 Demo Site 產業盤點。</p>
+    <button class="l-close" id="abClose">知道了</button>
+  </div>
+</section>
+
+<div id="nowebgl"><p><b>這台裝置無法顯示 3D 群島</b></p><p>已為你切換到清單模式，所有內容都能在清單中瀏覽。</p></div>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js"></script>
+<script>
+/*__DATA__*/
+</script>
+<script>
+/*__DATA2__*/
+</script>
+<script>
+/*__APP__*/
+</script>
+</body>
+</html>
